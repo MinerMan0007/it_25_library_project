@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "title": "Tõde ja õigus",
+    "author": "A. H. Tammsaare",
+    "year": 1926,
+    "genre": "Romaan",
+    "is_borrowed": false
+  },
+  {
+    "id": 2,
+    "title": "Kevade",
+    "author": "Oskar Luts",
+    "year": 1912,
+    "genre": "Jutustus",
+    "is_borrowed": true
+  },
+  {
+    "id": 3,
+    "title": "Naksitrallid",
+    "author": "Eno Raud",
+    "year": 1972,
+    "genre": "Lasteraamat",
+    "is_borrowed": false
+  },
+  {
+    "id": 4,
+    "title": "1984",
+    "author": "George Orwell",
+    "year": 1949,
+    "genre": "Düstoopia",
+    "is_borrowed": true
+  },
+  {
+    "id": 5,
+    "title": "Väike prints",
+    "author": "Antoine de Saint-Exupéry",
+    "year": 1943,
+    "genre": "Muinasjutt",
+    "is_borrowed": false
+  },
+  {
+    "id": 6,
+    "title": "Sipsik",
+    "author": "Eno Raud",
+    "year": 1962,
+    "genre": "Lasteraamat",
+    "is_borrowed": false
+  },
+  {
+    "id": 7,
+    "title": "Kolm musketäri",
+    "author": "Alexandre Dumas",
+    "year": 1844,
+    "genre": "Seiklus",
+    "is_borrowed": true
+  },
+  {
+    "id": 8,
+    "title": "Kuritöö ja karistus",
+    "author": "Fjodor Dostojevski",
+    "year": 1866,
+    "genre": "Romaan",
+    "is_borrowed": false
+  },
+  {
+    "id": 9,
+    "title": "Harry Potter Tarkadekivi",
+    "author": "Rowling",
+    "year": 1995,
+    "genre": "Ulme",
+    "is_borrowed": false
+  }
+]

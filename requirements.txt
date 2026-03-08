@@ -1,0 +1,2 @@
+# Väliseid teeke ei ole vaja.
+# Rakendus kasutab ainult Pythoniga kaasas olevaid mooduleid.

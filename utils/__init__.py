@@ -1,0 +1,1 @@
+"""Üldised abifunktsioonid ja käivitusloogika."""
