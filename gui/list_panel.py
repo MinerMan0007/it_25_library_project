@@ -7,10 +7,10 @@ from models.book import Book
 
 
 class BookListPanel(ttk.LabelFrame):
-    """Kuvab raamatute nimekirja tabeli kujul."""
+    """Kuvab raamatute nimekirja tabeli kujul ja raamatute arvu."""
 
     def __init__(self, master: tk.Misc) -> None:
-        """Loob tabeli, kerimisriba ja veerud."""
+        """Loob tabeli, kerimisriba, veerud ja loenduri."""
         super().__init__(master, text="Raamatute nimekiri")
 
         self.tree = ttk.Treeview(
@@ -19,10 +19,15 @@ class BookListPanel(ttk.LabelFrame):
             show="headings",
             height=15,
         )
+
+        # Raamatute arvu silt (Rasmuse lisaülesanne)
+        self.count_var = tk.StringVar(value="Raamatuid kokku: 0")
+        self.count_label = ttk.Label(self, textvariable=self.count_var, font=("TkDefaultFont", 9, "bold"))
+
         self._build_widgets()
 
     def populate(self, books: list[Book]) -> None:
-        """Asendab tabeli sisu etteantud raamatute andmetega."""
+        """Asendab tabeli sisu etteantud raamatute andmetega ja uuendab loendurit."""
         for item_id in self.tree.get_children():
             self.tree.delete(item_id)
 
@@ -32,6 +37,9 @@ class BookListPanel(ttk.LabelFrame):
                 "end",
                 values=(book.id, book.title, book.author, book.year, book.genre, book.status_label),
             )
+
+        # Uuenda raamatute arvu
+        self.count_var.set(f"Raamatuid tabelis: {len(books)}")
 
     def get_selected_book_id(self) -> int | None:
         """Tagastab valitud tabelirea raamatu ID."""
@@ -46,7 +54,7 @@ class BookListPanel(ttk.LabelFrame):
         return int(values[0])
 
     def _build_widgets(self) -> None:
-        """Paigutab tabeli veerud ja kerimisriba."""
+        """Paigutab tabeli veerud, kerimisriba ja loenduri."""
         scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.tree.yview)
         self.tree.configure(yscrollcommand=scrollbar.set)
 
@@ -72,8 +80,12 @@ class BookListPanel(ttk.LabelFrame):
             self.tree.heading(column_name, text=heading_text)
             self.tree.column(column_name, width=widths[column_name], anchor="center")
 
-        self.tree.grid(row=0, column=0, sticky="nsew", padx=(8, 0), pady=8)
-        scrollbar.grid(row=0, column=1, sticky="ns", padx=(0, 8), pady=8)
+        # Paigutus
+        self.tree.grid(row=0, column=0, sticky="nsew", padx=(8, 0), pady=(8, 0))
+        scrollbar.grid(row=0, column=1, sticky="ns", pady=(8, 0))
+
+        # Loenduri paigutus tabeli alla
+        self.count_label.grid(row=1, column=0, columnspan=2, sticky="w", padx=8, pady=8)
 
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)

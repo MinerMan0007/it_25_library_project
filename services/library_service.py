@@ -4,7 +4,6 @@ from models.book import Book
 from services.validators import validate_book_input
 from storage.json_storage import JsonStorage
 
-
 type BookList = list[Book]
 
 
@@ -38,28 +37,45 @@ class LibraryService:
         self.storage.save_books(self.books)
         return True, "Raamat lisati edukalt."
 
-    def delete_book(self, book_id: int) -> tuple[bool, str]:
-        """Eemaldab raamatu tema ID põhjal."""
-        for book in self.books:
-            if book.id == book_id:
-                self.books.remove(book)
-                self.storage.save_books(self.books)
-                return True, "Raamat kustutati edukalt."
+    def update_book(self, book_id: int, title: str, author: str, year_text: str, genre: str) -> tuple[bool, str]:
+        """Uuendab olemasoleva raamatu andmeid."""
+        is_valid, message = validate_book_input(title, author, year_text, genre)
+        if not is_valid:
+            return False, message
 
-        return False, "Valitud raamatut ei leitud."
+        book = self.get_book_by_id(book_id)
+        if not book:
+            return False, "Raamatut ei leitud."
 
-    def toggle_book_status(self, book_id: int) -> tuple[bool, str]:
-        """Vahetab raamatu staatuse kohal ja väljas vahel."""
-        book = self.find_by_id(book_id)
-        if book is None:
-            return False, "Valitud raamatut ei leitud."
+        book.title = title.strip()
+        book.author = author.strip()
+        book.year = int(year_text.strip())
+        book.genre = genre.strip()
 
-        book.is_borrowed = not book.is_borrowed
         self.storage.save_books(self.books)
-        return True, f"Raamatu uus staatus: {book.status_label}."
+        return True, "Raamatu andmed on edukalt muudetud."
 
-    def find_by_id(self, book_id: int) -> Book | None:
-        """Otsib raamatu ID järgi."""
+    def delete_book(self, book_id: int) -> bool:
+        """Eemaldab raamatu nimekirjast ja salvestab muudatused."""
+        original_count = len(self.books)
+        self.books = [book for book in self.books if book.id != book_id]
+
+        if len(self.books) < original_count:
+            self.storage.save_books(self.books)
+            return True
+        return False
+
+    def toggle_borrow_status(self, book_id: int) -> bool:
+        """Muudab raamatu laenutusstaatust."""
+        book = self.get_book_by_id(book_id)
+        if book:
+            book.is_borrowed = not book.is_borrowed
+            self.storage.save_books(self.books)
+            return True
+        return False
+
+    def get_book_by_id(self, book_id: int) -> Book | None:
+        """Leiab raamatu ID põhjal."""
         for book in self.books:
             if book.id == book_id:
                 return book
@@ -84,9 +100,6 @@ class LibraryService:
         """Laeb andmed failist uuesti mällu."""
         self.books = self.storage.load_books()
 
-    # Õpilase laienduse koht:
-    # siia saab lisada valitud raamatu andmete muutmise loogika.
-
     def _generate_id(self) -> int:
         """Leiab järgmise vaba täisarvulise ID."""
         if not self.books:
@@ -101,4 +114,4 @@ class LibraryService:
             case "Väljas":
                 return [book for book in books if book.is_borrowed]
             case _:
-                return list(books)
+                return books

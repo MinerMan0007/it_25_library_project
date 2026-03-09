@@ -16,7 +16,7 @@ class LibraryApp:
         self.service = service
         self.root = tk.Tk()
         self.root.title("Raamatukogu haldur")
-        self.root.geometry("1100x620")
+        self.root.geometry("1100x650")  # Veidi kõrgem, et loendur mahuks mugavalt
         self.root.minsize(980, 560)
 
         self.form_panel = BookFormPanel(self.root)
@@ -39,24 +39,36 @@ class LibraryApp:
             self.form_panel.clear_form()
             self.refresh_list()
             messagebox.showinfo("Info", message)
+        else:
+            messagebox.showwarning("Hoiatus", message)
+
+    def update_book(self) -> None:
+        """Muudab valitud raamatu andmeid vormi sisendi põhjal."""
+        book_id = self.list_panel.get_selected_book_id()
+        if book_id is None:
+            messagebox.showwarning("Hoiatus", "Palun vali tabelist raamat, mida soovid muuta.")
             return
 
-        messagebox.showerror("Viga", message)
+        title, author, year_text, genre = self.form_panel.get_book_form_data()
+        success, message = self.service.update_book(book_id, title, author, year_text, genre)
 
-    def delete_selected_book(self) -> None:
-        """Kustutab parajasti valitud raamatu."""
+        if success:
+            self.refresh_list()
+            messagebox.showinfo("Info", message)
+        else:
+            messagebox.showwarning("Hoiatus", message)
+
+    def delete_book(self) -> None:
+        """Kustutab valitud raamatu pärast kinnitust."""
         book_id = self.list_panel.get_selected_book_id()
         if book_id is None:
             messagebox.showwarning("Hoiatus", "Palun vali tabelist raamat.")
             return
 
-        success, message = self.service.delete_book(book_id)
-        if success:
-            self.refresh_list()
-            messagebox.showinfo("Info", message)
-            return
-
-        messagebox.showerror("Viga", message)
+        if messagebox.askyesno("Kinnitus", "Kas oled kindel, et soovid selle raamatu kustutada?"):
+            if self.service.delete_book(book_id):
+                self.refresh_list()
+                messagebox.showinfo("Info", "Raamat on kustutatud.")
 
     def toggle_selected_status(self) -> None:
         """Muudab valitud raamatu staatust."""
@@ -65,23 +77,18 @@ class LibraryApp:
             messagebox.showwarning("Hoiatus", "Palun vali tabelist raamat.")
             return
 
-        success, message = self.service.toggle_book_status(book_id)
-        if success:
+        if self.service.toggle_borrow_status(book_id):
             self.refresh_list()
-            messagebox.showinfo("Info", message)
-            return
-
-        messagebox.showerror("Viga", message)
 
     def refresh_list(self) -> None:
-        """Värskendab tabeli sisu otsingu ja filtri järgi."""
+        """Värskendab tabelit vastavalt otsingule ja filtrile."""
         query = self.form_panel.get_search_query()
         status_filter = self.form_panel.get_status_filter()
         books = self.service.search_books(query, status_filter)
         self.list_panel.populate(books)
 
     def _build_layout(self) -> None:
-        """Paigutab peamised paneelid aknasse."""
+        """Seadistab põhiakna paigutuse."""
         self.root.columnconfigure(1, weight=1)
         self.root.rowconfigure(0, weight=1)
 
@@ -100,15 +107,15 @@ class LibraryApp:
         ttk.Button(button_frame, text="Värskenda vaadet", command=self.refresh_list).grid(
             row=0, column=1, sticky="ew", padx=(4, 0), pady=4
         )
-        ttk.Button(button_frame, text="Muuda staatust", command=self.toggle_selected_status).grid(
+
+        # Uus nupp andmete muutmiseks
+        ttk.Button(button_frame, text="Muuda andmeid", command=self.update_book).grid(
             row=1, column=0, sticky="ew", padx=(0, 4), pady=4
         )
-        ttk.Button(button_frame, text="Kustuta valitud", command=self.delete_selected_book).grid(
+
+        ttk.Button(button_frame, text="Muuda staatust", command=self.toggle_selected_status).grid(
             row=1, column=1, sticky="ew", padx=(4, 0), pady=4
         )
-
-        # Õpilase laienduse koht:
-        # siia saab lisada nupu valitud raamatu andmete muutmiseks.
-
-        self.form_panel.search_entry.bind("<KeyRelease>", lambda _event: self.refresh_list())
-        self.form_panel.status_box.bind("<<ComboboxSelected>>", lambda _event: self.refresh_list())
+        ttk.Button(button_frame, text="Kustuta raamat", command=self.delete_book).grid(
+            row=2, column=0, columnspan=2, sticky="ew", pady=(4, 0)
+        )
